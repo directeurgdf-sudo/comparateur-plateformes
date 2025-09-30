@@ -6,13 +6,29 @@ import pandas as pd
 import streamlit as st
 
 # ==========================
-#  🎨 Thème & Styles GDF
+#  🎨 Thème & Styles GDF (RaleWay + Vert #4BAB77)
 # ==========================
-GDF_GREEN = "#2E7D32"  # vert Gîtes de France
+GDF_GREEN = "#4BAB77"  # vert GDF demandé
 GDF_TEXT_ON_GREEN = "#FFFFFF"
 
 CUSTOM_CSS = f"""
 <style>
+/* Police Raleway partout */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap');
+html, body, [class^="css"] {{ font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif; }}
+
+/* Sidebar en vert GDF */
+section[data-testid="stSidebar"] > div {{
+  background:{GDF_GREEN}!important; color:{GDF_TEXT_ON_GREEN}!important;
+}}
+section[data-testid="stSidebar"] h1, 
+section[data-testid="stSidebar"] h2, 
+section[data-testid="stSidebar"] h3, 
+section[data-testid="stSidebar"] label, 
+section[data-testid="stSidebar"] p, 
+section[data-testid="stSidebar"] span {{ color:{GDF_TEXT_ON_GREEN}!important; }}
+section[data-testid="stSidebar"] .stSlider > div > div > div {{ color:{GDF_TEXT_ON_GREEN}!important; }}
+
 /***** Titres façon bouton *****/
 .gdf-btn-title {{
   display:inline-block; padding:10px 16px; border-radius:9999px;
@@ -90,11 +106,11 @@ DEFAULT_PRICE_POINTS = [100, 300, 500, 1000, 1500, 2000]
 # ==========================
 #  UI
 # ==========================
-st.set_page_config(page_title="Comparateur plateformes – Gîtes de France", layout="wide")
+st.set_page_config(page_title="Comparateur de plateformes — Gîtes de France", layout="wide")
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-st.markdown('<span class="gdf-btn-title">📊 Simulateur commissions & frais client</span>', unsafe_allow_html=True)
-st.caption("Comparaison du **net hôte** et des **frais globaux** pour plusieurs plateformes et différents **prix de vente**.")
+# Nouveau titre remplacé
+st.markdown('<span class="gdf-btn-title">🏆 Classement des plateformes</span>', unsafe_allow_html=True)
 
 with st.sidebar:
     st.markdown('<span class="gdf-btn-title">⚙️ Paramètres Gîtes de France</span>', unsafe_allow_html=True)
@@ -187,13 +203,10 @@ def table_to_html(df: pd.DataFrame) -> str:
     return f"<div class='gdf-table'><table>{thead}{tbody}</table></div>"
 
 # ==========================
-#  Affichage
+#  Affichage (classements en haut, tableau comparatif en bas)
 # ==========================
 
-st.markdown('<span class="gdf-btn-title">Tableau comparatif</span>', unsafe_allow_html=True)
-st.markdown(table_to_html(DF), unsafe_allow_html=True)
-
-st.markdown('<span class="gdf-btn-title">Classements par prix</span>', unsafe_allow_html=True)
+# CLASSEMENTS EN HAUT
 for price in PRICE_POINTS:
     sub = DF[DF["Prix de vente (client)"] == price].copy()
     sub_net = sub.sort_values("Net hôte (€)", ascending=False).reset_index(drop=True)
@@ -205,6 +218,9 @@ for price in PRICE_POINTS:
     with c2:
         st.markdown(f"**Frais globaux les plus faibles – {int(price)} €**")
         st.markdown(table_to_html(sub_fees[["Plateforme", "Frais globaux (€)"]]), unsafe_allow_html=True)
+
+st.markdown('<span class="gdf-btn-title">📋 Tableau comparatif</span>', unsafe_allow_html=True)
+st.markdown(table_to_html(DF), unsafe_allow_html=True)
 
 # ==========================
 #  Exports
@@ -218,7 +234,6 @@ with col_a:
         mime="text/csv",
     )
 with col_b:
-    # config export pour traçabilité
     cfg = pd.DataFrame([
         {
             "Plateforme": GDF.name,
