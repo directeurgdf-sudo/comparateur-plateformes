@@ -315,7 +315,7 @@ with col_b:
         mime="text/csv",
     )
 
-st.caption("Formules : Base avant frais client = Prix public − Frais clients ·· Net hôte = Base × (1 − commission hôte). Si saisie 'net propriétaire', le prix public est recalculé en tenant compte du type de frais client (%, plancher/plafond éventuels ou forfait).").
+st.caption("Formules : Base avant frais client = Prix public − Frais clients ·· Net hôte = Base × (1 − commission hôte). Si saisie 'net propriétaire', le prix public est recalculé en tenant compte du type de frais client (%, plancher/plafond éventuels ou forfait)."). Si saisie 'net propriétaire', le prix public est recalculé en tenant compte du type de frais client (%, plancher/plafond éventuels ou forfait).").
 "
     "Si saisie 'net propriétaire', le prix public est recalculé en tenant compte du type de frais client (%, plancher/plafond éventuels ou forfait)."
 ).
