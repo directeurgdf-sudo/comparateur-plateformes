@@ -27,7 +27,10 @@ section[data-testid="stSidebar"] h3,
 section[data-testid="stSidebar"] label, 
 section[data-testid="stSidebar"] p, 
 section[data-testid="stSidebar"] span {{ color:{GDF_TEXT_ON_GREEN}!important; }}
-section[data-testid="stSidebar"] .stSlider > div > div > div {{ color:{GDF_TEXT_ON_GREEN}!important; }}
+/* Pastille blanche "Paramètres" */
+.sidebar-pill {{
+  display:inline-block; background:#FFFFFF; color:#000000; padding:8px 14px; border-radius:999px; font-weight:700;
+}}
 
 /***** Titres façon bouton *****/
 .gdf-btn-title {{
@@ -46,6 +49,7 @@ section[data-testid="stSidebar"] .stSlider > div > div > div {{ color:{GDF_TEXT_
 .gdf-table th:first-child, .gdf-table td:first-child {{ text-align:left; }}
 .gdf-table thead th {{ background:#fafafa; position:sticky; top:0; z-index:1; }}
 .gdf-table .row-gdf td {{ background:{GDF_GREEN}; color:{GDF_TEXT_ON_GREEN}; font-weight:700; }}
+.gdf-table td.col-highlight {{ background:#E3F2EA; color:#000; font-weight:700; }}
 .badge-gdf {{
   display:inline-block; padding:2px 8px; border-radius:999px; background:{GDF_GREEN}; color:{GDF_TEXT_ON_GREEN}; font-size:.80rem; margin-left:6px;
 }}
@@ -85,7 +89,7 @@ class Platform:
 # ==========================
 # Gîtes de France (éditable dans la barre latérale)
 GDF_DEFAULT = Platform(
-    name="Gîtes de France – Chambre d'hôtes",
+    name="Gîtes de France",
     host_commission_pct=8.0,
     client_fee_mode="fixed",
     client_fee_value=6.0,
@@ -113,7 +117,7 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 st.markdown('<span class="gdf-btn-title">🏆 Classement des plateformes</span>', unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown('<span class="gdf-btn-title">⚙️ Paramètres Gîtes de France</span>', unsafe_allow_html=True)
+    st.markdown('<span class="sidebar-pill">Paramètres</span>', unsafe_allow_html=True)
     st.write("Seuls les paramètres Gîtes de France sont modifiables. Les autres plateformes sont figées.")
 
     # Édition GDF uniquement
@@ -129,9 +133,18 @@ with st.sidebar:
     value_lbl = "%" if client_fee_mode == "percentage" else "€"
     client_fee_value = st.number_input(f"Montant des frais client ({value_lbl})", min_value=0.0, step=0.1, value=GDF_DEFAULT.client_fee_value)
 
-    prices_txt = st.text_input("Prix de vente testés (séparés par des virgules)", value=", ".join(str(p) for p in DEFAULT_PRICE_POINTS))
+    st.divider()
+    method = st.radio("Méthode de saisie", ["Prix public payé par le client", "Tarif net propriétaire"], index=0)
+    if method == "Prix public payé par le client":
+        single_price = st.number_input("Prix public (client)", min_value=0.0, step=50.0, value=1000.0)
+        input_mode = "price_client"
+        input_value = single_price
+    else:
+        single_net = st.number_input("Tarif net propriétaire", min_value=0.0, step=50.0, value=850.0)
+        input_mode = "net_host"
+        input_value = single_net
 
-# Parse prix
+# Pas de parsing de liste : un seul tarif saisi côté barre latérale
 _def_prices = []
 for chunk in prices_txt.replace(";", ",").split(","):
     s = chunk.strip().replace("€", "").replace(" ", "")
@@ -151,26 +164,32 @@ PLATFORMS: List[Platform] = [GDF] + FIXED_PLATFORMS
 #  Calculs
 # ==========================
 
-def compute_table(platforms: List[Platform], prices: List[float]) -> pd.DataFrame:
+def compute_table(platforms: List[Platform], input_mode: str, input_value: float) -> pd.DataFrame:
     rows: List[Dict[str, float | str]] = []
     for p in platforms:
-        for price in prices:
-            client_fee = round(p.client_fee_amount(price), 2)
-            base = round(p.base_before_client_fees(price), 2)
-            net = round(p.host_net(price), 2)
-            total_fees = round(p.global_fees(price), 2)
-            rows.append({
-                "Plateforme": p.name,
-                "Barème appliqué": f"Hôte {p.host_commission_pct:g}% | Client " + (f"{p.client_fee_value:g}%" if p.client_fee_mode == "percentage" else f"{p.client_fee_value:g} €"),
-                "Prix de vente (client)": price,
-                "Frais client (€)": client_fee,
-                "Base avant frais client": base,
-                "Net hôte (€)": net,
-                "Frais globaux (€)": total_fees,
-            })
-    df = pd.DataFrame(rows)
-    df = df.sort_values(["Plateforme", "Prix de vente (client)"]).reset_index(drop=True)
-    return df
+        h = p.host_commission_pct / 100.0
+        if input_mode == "price_client":
+            P = float(input_value)
+        else:
+            N = float(input_value)
+            if p.client_fee_mode == "percentage":
+                cp = p.client_fee_value / 100.0
+                P = N / ((1 - cp) * (1 - h)) if (1 - cp) * (1 - h) != 0 else float('inf')
+            else:
+                f = p.client_fee_value
+                P = f + (N / (1 - h)) if (1 - h) != 0 else float('inf')
+        # maintenant calculs
+        client_fee = p.client_fee_amount(P)
+        base = P - client_fee
+        host_comm_eur = base * h
+        net = base - host_comm_eur
+        method_txt = (f"pourcentage du prix de vente ({p.client_fee_value:g}%)" if p.client_fee_mode == "percentage" else f"forfait fixe ({p.client_fee_value:g} €)")
+        rows.append({
+            "Plateforme": p.name,
+            "Méthode calcul": method_txt,
+            "Taux de commission (%)": round(p.host_commission_pct, 2),
+            "Frais clients (€)": round(client_fee, 2),
+            "Frais h
 
 DF = compute_table(PLATFORMS, PRICE_POINTS)
 
