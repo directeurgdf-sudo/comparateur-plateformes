@@ -208,30 +208,31 @@ def compute_table(platforms: List[Platform], input_mode: str, input_value: float
         else:
             P = price_from_net(p, float(input_value))
 
-        # Frais client
+        # Frais / base / commission / net
         client_fee = p.client_fee_amount(P)
-        # Base et frais hôte
         base = P - client_fee
         host_fee_eur = base * h
         net = base - host_fee_eur
 
-        # Méthodes (texte)
+        # Deux colonnes méthodes séparées
         client_method = (
-            f"pourcentage du prix de vente ({p.client_fee_value:g}%)" +
-            (f", plancher {p.client_fee_floor_eur:g} €" if p.client_fee_floor_eur else "") +
-            (f", plafond {p.client_fee_cap_eur:g} €" if p.client_fee_cap_eur is not None else "")
+            f"pourcentage du prix de vente ({p.client_fee_value:g}%)"
+            + (f", plancher {p.client_fee_floor_eur:g} €" if getattr(p, 'client_fee_floor_eur', 0) else "")
+            + (f", plafond {p.client_fee_cap_eur:g} €" if getattr(p, 'client_fee_cap_eur', None) is not None else "")
             if p.client_fee_mode == "percentage" else f"forfait fixe ({p.client_fee_value:g} €)"
         )
         host_method = f"commission hôte {p.host_commission_pct:g}%"
 
         rows.append({
             "Plateforme": p.name,
-            "Méthode calcul": client_method + " · " + host_method,
+            "Méthode frais client": client_method,
+            "Méthode commission hôte": host_method,
             "Frais clients (€)": round(client_fee, 2),
             "Frais hôte (€)": round(host_fee_eur, 2),
             "Net hôte (€)": round(net, 2),
             "Total prix public (client) (€)": round(P, 2),
         })
+
     df = pd.DataFrame(rows)
     # Mettre GDF en tête
     df["_is_gdf"] = df["Plateforme"].str.lower().str.startswith("gîtes de france")
