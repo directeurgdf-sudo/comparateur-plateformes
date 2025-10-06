@@ -9,8 +9,8 @@ import streamlit as st
 #  🎨 Thème & Styles GDF (Raleway + Vert #4BAB77)
 # ==========================
 GDF_GREEN = "#4BAB77"
-GDF_DARK = "#00653F"  # pour sélecteurs
-GDF_TEXT_ON_GREEN = "#000000"  # texte noir dans les pastilles, cf. maquette
+GDF_DARK = "#00653F"
+GDF_TEXT_ON_GREEN = "#000000"
 
 CUSTOM_CSS = f"""
 <style>
@@ -43,9 +43,16 @@ section[data-testid="stSidebar"] span {{ color:#FFFFFF!important; }}
 .gdf-table thead th {{ background:#fafafa; position:sticky; top:0; z-index:1; }}
 .gdf-table .row-gdf td {{ background:{GDF_GREEN}; color:#FFFFFF; font-weight:700; }}
 .gdf-table td.col-highlight {{ background:#E3F2EA; color:#000; font-weight:700; }}
-.badge-gdf {{ display:inline-block; padding:2px 8px; border-radius:999px; background:{GDF_GREEN}; color:#000; font-size:.80rem; margin-left:6px; border:1px solid rgba(0,0,0,.15);} }
+
+/* 🔧 Correction ici : bien terminer par '}}' (et non '}' puis '}') */
+.badge-gdf {{
+  display:inline-block; padding:2px 8px; border-radius:999px;
+  background:{GDF_GREEN}; color:#000; font-size:.80rem; margin-left:6px;
+  border:1px solid rgba(0,0,0,.15);
+}}
 </style>
 """
+
 
 # ==========================
 #  Modèle
