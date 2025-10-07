@@ -361,3 +361,21 @@ div[data-testid="stSidebar"] [data-baseweb="radio"] input[type="radio"] {
 }
 </style>
 """, unsafe_allow_html=True)
+
+# Renfort couleur VERT sur radios/checkbox (BaseWeb) + icônes SVG (fin de script)
+st.markdown("""
+<style>
+/* Radios (BaseWeb) : cercle et point sélectionné */
+section[data-testid="stSidebar"] [data-baseweb="radio"] svg { color:#00653F !important; fill:#00653F !important; }
+section[data-testid="stSidebar"] [role="radiogroup"] svg { color:#00653F !important; fill:#00653F !important; }
+section[data-testid="stSidebar"] [data-baseweb="radio"] input:checked + div svg { color:#00653F !important; fill:#00653F !important; }
+
+/* Checkbox (BaseWeb) */
+section[data-testid="stSidebar"] [data-baseweb="checkbox"] svg { color:#00653F !important; fill:#00653F !important; }
+section[data-testid="stSidebar"] [data-baseweb="checkbox"] input:checked + div svg { color:#00653F !important; fill:#00653F !important; }
+
+/* Fallback accent-color */
+section[data-testid="stSidebar"] input[type="radio"],
+section[data-testid="stSidebar"] input[type="checkbox"] { accent-color:#00653F !important; }
+</style>
+""", unsafe_allow_html=True)
