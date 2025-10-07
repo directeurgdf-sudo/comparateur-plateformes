@@ -291,57 +291,15 @@ PLATFORMS: List[Platform] = [GDF] + FIXED_PLATFORMS
 # Calcul principal
 DF = compute_table(PLATFORMS, input_mode, input_value)
 
-# Classement dynamique + GDF en tête
+# ===== Classement dynamique (même logique que les anciens tableaux) =====
+# GDF en tête, puis tri selon la méthode de saisie
+sort_col = "Net propriétaire (€)" if input_mode == "net_host" else "Total prix public client (€)"
+sort_asc = False if input_mode == "net_host" else True
 DF["_is_gdf"] = DF["Plateforme"].str.lower().str.startswith("gîtes de france")
-if input_mode == "net_host":
-    others = DF[~DF["_is_gdf"]].sort_values("Net propriétaire (€)", ascending=False)
-else:
-    others = DF[~DF["_is_gdf"]].sort_values("Total prix public client (€)", ascending=True)
-DF = pd.concat([DF[DF["_is_gdf"]], others]).drop(columns=["_is_gdf"]).reset_index(drop=True)
+others = DF[~DF["_is_gdf"]].sort_values([sort_col, "Plateforme"], ascending=[sort_asc, True])
+DF = pd.concat([DF[DF["_is_gdf"]], others], ignore_index=True).drop(columns=["_is_gdf"]) 
 
 # Affichage du tableau principal
 st.markdown(table_to_html(DF), unsafe_allow_html=True)
 
-# ==========================
-#  Exports
-# ==========================
-col_a, col_b = st.columns(2)
-with col_a:
-    st.download_button(
-        label="Télécharger le tableau (CSV)",
-        data=DF.to_csv(index=False).encode("utf-8"),
-        file_name="comparatif_plateformes.csv",
-        mime="text/csv",
-    )
 
-st.caption("Formules : Base avant frais client = Prix public − Frais clients ·· Net propriétaire = Base × (1 − commission propriétaire). Si saisie 'net propriétaire', le prix public est recalculé en tenant compte du type de frais client (%, plancher/plafond éventuels ou forfait).")
-
-# 🔧 Forcer EN DERNIER la couleur verte des radios/checkbox (après l'hydratation Streamlit)
-st.markdown("""
-<style>
-section[data-testid="stSidebar"] input[type="radio"],
-section[data-testid="stSidebar"] input[type="checkbox"],
-div[data-testid="stSidebar"] [role="radiogroup"] input[type="radio"],
-div[data-testid="stSidebar"] [data-baseweb="radio"] input[type="radio"] {
-  accent-color:#00653F !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Renfort couleur VERT sur radios/checkbox (BaseWeb) + icônes SVG (fin de script)
-st.markdown("""
-<style>
-/* Radios (BaseWeb) : cercle et point sélectionné */
-section[data-testid="stSidebar"] [data-baseweb="radio"] svg { color:#00653F !important; fill:#00653F !important; }
-section[data-testid="stSidebar"] [role="radiogroup"] svg { color:#00653F !important; fill:#00653F !important; }
-section[data-testid="stSidebar"] [data-baseweb="radio"] input:checked + div svg { color:#00653F !important; fill:#00653F !important; }
-
-/* Checkbox (BaseWeb) */
-section[data-testid="stSidebar"] [data-baseweb="checkbox"] svg { color:#00653F !important; fill:#00653F !important; }
-section[data-testid="stSidebar"] [data-baseweb="checkbox"] input:checked + div svg { color:#00653F !important; fill:#00653F !important; }
-
-/* Fallback accent-color */
-section[data-testid="stSidebar"] input[type="radio"],
-section[data-testid="stSidebar"] input[type="checkbox"] { accent-color:#00653F !important; }
-</style>
-""", unsafe_allow_html=True)
