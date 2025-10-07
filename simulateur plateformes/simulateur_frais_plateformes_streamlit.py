@@ -293,10 +293,14 @@ PLATFORMS: List[Platform] = [GDF] + FIXED_PLATFORMS
 DF = compute_table(PLATFORMS, input_mode, input_value)
 
 # ===== Classement dynamique (même logique que les anciens tableaux) =====
-# Classement global (GDF inclus) selon la méthode de saisie
-sort_col = "Net propriétaire (€)" if input_mode == "net_host" else "Total prix public client (€)"
-sort_asc = False if input_mode == "net_host" else True
-DF = DF.sort_values([sort_col, "Plateforme"], ascending=[sort_asc, True]).reset_index(drop=True)
+# Classement global (GDF inclus) + brisage d'égalité comme dans les anciens tableaux
+if input_mode == "net_host":
+    sort_cols = ["Net propriétaire (€)", "Total prix public client (€)", "Plateforme"]
+    sort_asc  = [False, True, True]
+else:
+    sort_cols = ["Total prix public client (€)", "Net propriétaire (€)", "Plateforme"]
+    sort_asc  = [True, False, True]
+DF = DF.sort_values(sort_cols, ascending=sort_asc).reset_index(drop=True)
 
 # Affichage du tableau principal
 st.markdown(table_to_html(DF), unsafe_allow_html=True)
