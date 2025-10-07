@@ -147,6 +147,17 @@ FIXED_PLATFORMS: List[Platform] = [
 # ==========================
 st.set_page_config(page_title="Comparateur de plateformes — Gîtes de France", layout="wide")
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+# Overrides CSS ciblés (pas de f-string -> pas besoin de doubler les accolades)
+st.markdown("""
+<style>
+/* Accent sélecteurs (dropdowns) dans la sidebar */
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div { border-color:#00653F !important; box-shadow:0 0 0 1px #00653F1A !important; }
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div:focus { box-shadow:0 0 0 2px #00653F66 !important; border-color:#00653F !important; }
+section[data-testid="stSidebar"] .stSelectbox svg { color:#00653F !important; fill:#00653F !important; }
+/* Force la ligne GDF en vert (tous tableaux rendus) */
+.gdf-table .row-gdf td { background:#4BAB77 !important; color:#FFFFFF !important; font-weight:700; }
+</style>
+""", unsafe_allow_html=True)
 
 # Titre haut : Classement
 st.title("Comparateurs de frais de réservation")
