@@ -45,8 +45,8 @@ section[data-testid="stSidebar"] span {{ color:#FFFFFF!important; }}
 .gdf-table td.col-highlight {{ background:#E3F2EA; color:#000; font-weight:700; }}
 .badge-gdf {{ display:inline-block; padding:2px 8px; border-radius:999px; background:{GDF_GREEN}; color:#000; font-size:.80rem; margin-left:6px; border:1px solid rgba(0,0,0,.15); }}
 /* Forcer la couleur des sélecteurs (accent #00653F) */
-section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div { border-color:#00653F!important; }
-section[data-testid="stSidebar"] .stSelectbox svg { fill:#00653F!important; color:#00653F!important; }
+section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {{ border-color:#00653F!important; }}
+section[data-testid="stSidebar"] .stSelectbox svg {{ fill:#00653F!important; color:#00653F!important; }}
 </style>
 """
 
