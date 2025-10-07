@@ -150,6 +150,9 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 # Overrides CSS ciblés (pas de f-string -> pas besoin de doubler les accolades)
 st.markdown("""
 <style>
+/* Couleur primaire Streamlit (impacte radio/checkbox/accents) */
+:root { --primary-color: #00653F; }
+
 /* Accent sélecteurs (dropdowns) dans la sidebar */
 section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div { border-color:#00653F !important; box-shadow:0 0 0 1px #00653F1A !important; }
 section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div:focus { box-shadow:0 0 0 2px #00653F66 !important; border-color:#00653F !important; }
