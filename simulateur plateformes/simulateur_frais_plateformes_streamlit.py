@@ -241,6 +241,7 @@ section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button { backg
 
 # Titre haut : Classement
 st.title("🏆 Comparateurs de frais de réservation")
+st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
 with st.sidebar:
     st.markdown('<span class="gdf-btn-title">Paramètres</span>', unsafe_allow_html=True)
@@ -292,12 +293,10 @@ PLATFORMS: List[Platform] = [GDF] + FIXED_PLATFORMS
 DF = compute_table(PLATFORMS, input_mode, input_value)
 
 # ===== Classement dynamique (même logique que les anciens tableaux) =====
-# GDF en tête, puis tri selon la méthode de saisie
+# Classement global (GDF inclus) selon la méthode de saisie
 sort_col = "Net propriétaire (€)" if input_mode == "net_host" else "Total prix public client (€)"
 sort_asc = False if input_mode == "net_host" else True
-DF["_is_gdf"] = DF["Plateforme"].str.lower().str.startswith("gîtes de france")
-others = DF[~DF["_is_gdf"]].sort_values([sort_col, "Plateforme"], ascending=[sort_asc, True])
-DF = pd.concat([DF[DF["_is_gdf"]], others], ignore_index=True).drop(columns=["_is_gdf"]) 
+DF = DF.sort_values([sort_col, "Plateforme"], ascending=[sort_asc, True]).reset_index(drop=True)
 
 # Affichage du tableau principal
 st.markdown(table_to_html(DF), unsafe_allow_html=True)
