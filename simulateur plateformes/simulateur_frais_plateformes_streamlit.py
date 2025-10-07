@@ -128,15 +128,15 @@ def price_from_net(platform: Platform, net: float) -> float:
 # ==========================
 GDF_DEFAULT = Platform(
     name="Gîtes de France",
-    host_commission_pct=8.0,
+    host_commission_pct=15.0,
     client_fee_mode="fixed",
-    client_fee_value=6.0,
+    client_fee_value=15.0,
 )
 
 FIXED_PLATFORMS: List[Platform] = [
     Platform("Tripadvisor / FlipKey", host_commission_pct=3.0,  client_fee_mode="percentage", client_fee_value=12.0),
     Platform("Airbnb host-only",      host_commission_pct=15.5, client_fee_mode="percentage", client_fee_value=0.0),
-    Platform("Vrbo / Abritel",        host_commission_pct=8.0,  client_fee_mode="percentage", client_fee_value=9.0),
+    Platform("Vrbo / Abritel",        host_commission_pct=15.0,  client_fee_mode="percentage", client_fee_value=9.0),
     Platform("Airbnb split",          host_commission_pct=3.0,  client_fee_mode="percentage", client_fee_value=15.0),
     Platform("Booking.com",           host_commission_pct=17.0, client_fee_mode="percentage", client_fee_value=0.0),
     Platform("Holidu",                host_commission_pct=25.0, client_fee_mode="percentage", client_fee_value=0.0),
