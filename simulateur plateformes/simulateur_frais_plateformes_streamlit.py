@@ -10,7 +10,7 @@ import streamlit as st
 # ==========================
 GDF_GREEN = "#4BAB77"
 GDF_DARK = "#00653F"  # pour sélecteurs
-GDF_TEXT_ON_GREEN = "#000000"  # texte noir dans les pastilles, cf. maquette
+GDF_TEXT_ON_GREEN = "#FFFFFF"  # texte noir dans les pastilles, cf. maquette
 
 CUSTOM_CSS = f"""
 <style>
@@ -156,6 +156,7 @@ section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div:focu
 section[data-testid="stSidebar"] .stSelectbox svg { color:#00653F !important; fill:#00653F !important; }
 /* Force la ligne GDF en vert (tous tableaux rendus) */
 .gdf-table .row-gdf td { background:#4BAB77 !important; color:#FFFFFF !important; font-weight:700; }
+.gdf-btn-title { color:#FFFFFF !important; }
 </style>
 """, unsafe_allow_html=True)
 
