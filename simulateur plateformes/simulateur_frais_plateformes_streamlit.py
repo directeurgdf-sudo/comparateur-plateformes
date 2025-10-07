@@ -44,6 +44,9 @@ section[data-testid="stSidebar"] span {{ color:#FFFFFF!important; }}
 .gdf-table .row-gdf td {{ background:{GDF_GREEN}; color:#FFFFFF; font-weight:700; }}
 .gdf-table td.col-highlight {{ background:#E3F2EA; color:#000; font-weight:700; }}
 .badge-gdf {{ display:inline-block; padding:2px 8px; border-radius:999px; background:{GDF_GREEN}; color:#000; font-size:.80rem; margin-left:6px; border:1px solid rgba(0,0,0,.15); }}
+/* Forcer la couleur des sélecteurs (accent #00653F) */
+section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div { border-color:#00653F!important; }
+section[data-testid="stSidebar"] .stSelectbox svg { fill:#00653F!important; color:#00653F!important; }
 </style>
 """
 
@@ -146,6 +149,7 @@ st.set_page_config(page_title="Comparateur de plateformes — Gîtes de France",
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # Titre haut : Classement
+st.title("Comparateurs de frais de réservation")
 st.markdown('<span class="gdf-btn-title">🏆 Classement des plateformes</span>', unsafe_allow_html=True)
 
 with st.sidebar:
@@ -284,7 +288,6 @@ with c2:
     st.markdown("**Prix public le plus bas**")
     st.markdown(table_to_html(sub_price[["Plateforme", "Total prix public (client) (€)"]]), unsafe_allow_html=True)
 
-st.markdown('<span class="gdf-btn-title">📋 Tableau comparatif</span>', unsafe_allow_html=True)
 st.markdown(table_to_html(DF), unsafe_allow_html=True)
 
 # ==========================
