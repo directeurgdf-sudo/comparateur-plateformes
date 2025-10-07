@@ -349,3 +349,15 @@ with col_b:
     )
 
 st.caption("Formules : Base avant frais client = Prix public − Frais clients ·· Net hôte = Base × (1 − commission hôte). Si saisie 'net propriétaire', le prix public est recalculé en tenant compte du type de frais client (%, plancher/plafond éventuels ou forfait).")
+
+# 🔧 Forcer EN DERNIER la couleur verte des radios/checkbox (après l'hydratation Streamlit)
+st.markdown("""
+<style>
+section[data-testid="stSidebar"] input[type="radio"],
+section[data-testid="stSidebar"] input[type="checkbox"],
+div[data-testid="stSidebar"] [role="radiogroup"] input[type="radio"],
+div[data-testid="stSidebar"] [data-baseweb="radio"] input[type="radio"] {
+  accent-color:#00653F !important;
+}
+</style>
+""", unsafe_allow_html=True)
