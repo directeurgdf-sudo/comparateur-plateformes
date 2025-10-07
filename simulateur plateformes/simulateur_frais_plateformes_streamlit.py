@@ -154,8 +154,22 @@ st.markdown("""
 section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div { border-color:#00653F !important; box-shadow:0 0 0 1px #00653F1A !important; }
 section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div:focus { box-shadow:0 0 0 2px #00653F66 !important; border-color:#00653F !important; }
 section[data-testid="stSidebar"] .stSelectbox svg { color:#00653F !important; fill:#00653F !important; }
+
+/* Radio & checkbox en vert GDF (au lieu de rouge) */
+section[data-testid="stSidebar"] input[type="radio"],
+section[data-testid="stSidebar"] input[type="checkbox"] { accent-color:#00653F !important; }
+
+/* Champs texte/numériques: bordure/focus en vert */
+section[data-testid="stSidebar"] input:focus, 
+section[data-testid="stSidebar"] textarea:focus { border-color:#00653F !important; box-shadow:0 0 0 2px rgba(0,101,63,0.35) !important; outline:none !important; }
+
+/* Boutons + / - des number_input en vert */
+section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button { background:#4BAB77 !important; border-color:#4BAB77 !important; color:#FFFFFF !important; }
+
 /* Force la ligne GDF en vert (tous tableaux rendus) */
 .gdf-table .row-gdf td { background:#4BAB77 !important; color:#FFFFFF !important; font-weight:700; }
+
+/* Titre-badge vert lisible en blanc */
 .gdf-btn-title { color:#FFFFFF !important; }
 </style>
 """, unsafe_allow_html=True)
