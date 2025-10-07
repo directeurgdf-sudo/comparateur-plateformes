@@ -178,7 +178,7 @@ section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button { backg
 """, unsafe_allow_html=True)
 
 # Titre haut : Classement
-st.title("Comparateurs de frais de réservation")
+st.title("🏆 Comparateurs de frais de réservation")
 st.markdown('<span class="gdf-btn-title">🏆 Classement des plateformes</span>', unsafe_allow_html=True)
 
 with st.sidebar:
@@ -187,7 +187,7 @@ with st.sidebar:
 
     # GDF uniquement
     gdf_name = st.text_input("Nom affiché", value=GDF_DEFAULT.name)
-    host_commission_pct = st.number_input("Commission hôte (%)", min_value=0.0, max_value=100.0, step=0.1, value=GDF_DEFAULT.host_commission_pct)
+    host_commission_pct = st.number_input("Commission propriétaire (%)", min_value=0.0, max_value=100.0, step=0.1, value=GDF_DEFAULT.host_commission_pct)
 
     mode_label = st.selectbox(
         "Type de frais client",
@@ -254,16 +254,16 @@ def compute_table(platforms: List[Platform], input_mode: str, input_value: float
             + (f", plafond {p.client_fee_cap_eur:g} €" if getattr(p, 'client_fee_cap_eur', None) is not None else "")
             if p.client_fee_mode == "percentage" else f"forfait fixe ({p.client_fee_value:g} €)"
         )
-        host_method = f"commission hôte {p.host_commission_pct:g}%"
+        host_method = f"commission propriétaire {p.host_commission_pct:g}%"
 
         rows.append({
             "Plateforme": p.name,
+            "Net propriétaire (€)": round(net, 2),
+            "Méthode commission propriétaire": host_method,
+            "Frais propriétaire (€)": round(host_fee_eur, 2),
             "Méthode frais client": client_method,
-            "Méthode commission hôte": host_method,
             "Frais clients (€)": round(client_fee, 2),
-            "Frais hôte (€)": round(host_fee_eur, 2),
-            "Net hôte (€)": round(net, 2),
-            "Total prix public (client) (€)": round(P, 2),
+            "Total prix public client (€)": round(P, 2),
         })
 
     df = pd.DataFrame(rows)
@@ -273,6 +273,13 @@ def compute_table(platforms: List[Platform], input_mode: str, input_value: float
     return df
 
 DF = compute_table(PLATFORMS, input_mode, input_value)
+# Tri par Net propriétaire décroissant, GDF en premier
+DF["_is_gdf"] = DF["Plateforme"].str.lower().str.startswith("gîtes de france")
+DF = pd.concat([
+    DF[DF["_is_gdf"]].sort_values("Net propriétaire (€)", ascending=False),
+    DF[~DF["_is_gdf"]].sort_values("Net propriétaire (€)", ascending=False)
+]).reset_index(drop=True)
+DF = DF.drop(columns=["_is_gdf"])
 
 # ==========================
 #  Rendu HTML stylé (mise en avant GDF + colonnes surlignées)
@@ -292,7 +299,7 @@ def table_to_html(df: pd.DataFrame) -> str:
             else:
                 text = str(val)
             cls = ""
-            if col in ("Net hôte (€)", "Total prix public (client) (€)"):
+            if str(col).startswith("Net") or str(col).startswith("Total prix public"):
                 cls = "col-highlight"
             if col == "Plateforme" and is_gdf:
                 text = f"{text} <span class='badge-gdf'>GDF</span>"
@@ -302,21 +309,10 @@ def table_to_html(df: pd.DataFrame) -> str:
     return f"<div class='gdf-table'><table>{thead}{tbody}</table></div>"
 
 # ==========================
-#  Affichage (classement en haut, tableau comparatif en bas)
+#  Affichage (tableau unique trié)
 # ==========================
 
-sub = DF.copy()
-sub_net = sub.sort_values("Net hôte (€)", ascending=False).reset_index(drop=True)
-sub_price = sub.sort_values("Total prix public (client) (€)").reset_index(drop=True)
-
-c1, c2 = st.columns(2)
-with c1:
-    st.markdown("**Top net hôte**")
-    st.markdown(table_to_html(sub_net[["Plateforme", "Net hôte (€)"]]), unsafe_allow_html=True)
-with c2:
-    st.markdown("**Prix public le plus bas**")
-    st.markdown(table_to_html(sub_price[["Plateforme", "Total prix public (client) (€)"]]), unsafe_allow_html=True)
-
+st.markdown('<span class="gdf-btn-title">Classement des plateformes</span>', unsafe_allow_html=True)
 st.markdown(table_to_html(DF), unsafe_allow_html=True)
 
 # ==========================
@@ -333,7 +329,7 @@ with col_a:
 with col_b:
     cfg = pd.DataFrame([{
         "Plateforme": GDF.name,
-        "Commission hôte (%)": GDF.host_commission_pct,
+        "Commission propriétaire (%)": GDF.host_commission_pct,
         "Type frais client": "pourcentage du prix de vente" if GDF.client_fee_mode == "percentage" else "forfait fixe",
         "Valeur frais client": GDF.client_fee_value,
         "Plancher (€/resa)": GDF.client_fee_floor_eur if GDF.client_fee_mode == "percentage" else "",
@@ -348,7 +344,7 @@ with col_b:
         mime="text/csv",
     )
 
-st.caption("Formules : Base avant frais client = Prix public − Frais clients ·· Net hôte = Base × (1 − commission hôte). Si saisie 'net propriétaire', le prix public est recalculé en tenant compte du type de frais client (%, plancher/plafond éventuels ou forfait).")
+st.caption("Formules : Base avant frais client = Prix public − Frais clients ·· Net propriétaire = Base × (1 − commission propriétaire). Si saisie 'net propriétaire', le prix public est recalculé en tenant compte du type de frais client (%, plancher/plafond éventuels ou forfait).")
 
 # 🔧 Forcer EN DERNIER la couleur verte des radios/checkbox (après l'hydratation Streamlit)
 st.markdown("""
