@@ -168,6 +168,8 @@ def compute_table(platforms: List[Platform], input_mode: str, input_value: float
             if p.client_fee_mode == "percentage" else f"forfait fixe ({p.client_fee_value:g} €)"
         )
         host_method = f"commission propriétaire {p.host_commission_pct:g}%"
+        if p.name in ("Vrbo / Abritel", "Booking.com"):
+            host_method += " — frais d'encaissement inclus"
         rows.append({
             "Plateforme": p.name,
             "Net propriétaire (Loyers hors frais de commercialisation)": round(net, 2),
@@ -182,7 +184,17 @@ def compute_table(platforms: List[Platform], input_mode: str, input_value: float
 
 
 def table_to_html(df: pd.DataFrame) -> str:
-    thead = "<thead><tr>" + "".join(f"<th>{col}</th>" for col in df.columns) + "</tr></thead>"
+    # En-têtes multilignes pour une lecture plus claire
+    header_map = {
+        "Plateforme": "Plateforme",
+        "Net propriétaire (Loyers hors frais de commercialisation)": "Net propriétaire<br><small>(Loyers hors frais de commercialisation)</small>",
+        "Méthode commission propriétaire": "Méthode<br>commission propriétaire",
+        "Frais propriétaire (€)": "Frais<br>propriétaire (€)",
+        "Méthode frais client": "Méthode<br>frais client",
+        "Frais clients (€)": "Frais<br>clients (€)",
+        "Total client (Frais de commercialisation inclus)": "Total client<br><small>(Frais de commercialisation inclus)</small>",
+    }
+    thead = "<thead><tr>" + "".join(f"<th>{header_map.get(col, col)}</th>" for col in df.columns) + "</tr></thead>"
     rows_html = []
     for _, row in df.iterrows():
         is_gdf = str(row["Plateforme"]).lower().startswith("gîtes de france")
@@ -250,6 +262,8 @@ section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button { backg
 
 /* Titre-badge vert lisible en blanc */
 .gdf-btn-title { color:#FFFFFF !important; }
+.gdf-table th { white-space: normal; line-height: 1.25; text-align: left; }
+.gdf-table th small { font-weight: 400; color: #5f6c72; }
 </style>
 """, unsafe_allow_html=True)
 
