@@ -137,7 +137,7 @@ FIXED_PLATFORMS: List[Platform] = [
     Platform("Tripadvisor / FlipKey", host_commission_pct=3.0,  client_fee_mode="percentage", client_fee_value=12.0),
     Platform("Airbnb host-only",      host_commission_pct=15.5, client_fee_mode="percentage", client_fee_value=0.0),
     Platform("Vrbo / Abritel",        host_commission_pct=8.0,  client_fee_mode="percentage", client_fee_value=14.26),
-    Platform("Airbnb split",          host_commission_pct=16.94,  client_fee_mode="percentage", client_fee_value=15.0),
+    Platform("Airbnb split",          host_commission_pct=3.0,  client_fee_mode="percentage", client_fee_value=15.0),
     Platform("Booking.com",           host_commission_pct=17.0, client_fee_mode="percentage", client_fee_value=0.0),
     Platform("Holidu",                host_commission_pct=25.0, client_fee_mode="percentage", client_fee_value=0.0),
 ]
@@ -162,7 +162,7 @@ def compute_table(platforms: List[Platform], input_mode: str, input_value: float
         net = base - host_fee_eur
         # Méthodes textuelles séparées
         client_method = (
-            f"pourcentage du prix de vente ({p.client_fee_value:g}%) TTC"
+            f"pourcentage du prix de vente ({p.client_fee_value:g}%)"
             + (f", plancher {p.client_fee_floor_eur:g} €" if getattr(p, 'client_fee_floor_eur', 0) else "")
             + (f", plafond {p.client_fee_cap_eur:g} €" if getattr(p, 'client_fee_cap_eur', None) is not None else "")
             if p.client_fee_mode == "percentage" else f"forfait fixe ({p.client_fee_value:g} €)"
