@@ -170,12 +170,12 @@ def compute_table(platforms: List[Platform], input_mode: str, input_value: float
         host_method = f"commission propriétaire {p.host_commission_pct:g}%"
         rows.append({
             "Plateforme": p.name,
-            "Net propriétaire (€)": round(net, 2),
+            "Net propriétaire (Loyers hors frais de commercialisation)": round(net, 2),
             "Méthode commission propriétaire": host_method,
             "Frais propriétaire (€)": round(host_fee_eur, 2),
             "Méthode frais client": client_method,
             "Frais clients (€)": round(client_fee, 2),
-            "Total prix public client (€)": round(P, 2),
+            "Total client (Frais de commercialisation inclus)": round(P, 2),
         })
     df = pd.DataFrame(rows)
     return df
@@ -195,10 +195,24 @@ def table_to_html(df: pd.DataFrame) -> str:
             else:
                 text = str(val)
             cls = ""
-            if str(col).startswith("Net") or str(col).startswith("Total prix public"):
-                cls = "col-highlight"
-            if col == "Plateforme" and is_gdf:
-                text = f"{text} <span class='badge-gdf'>GDF</span>"
+            if str(col).startswith("Net propriétaire ("):
+                cls = "col-net"
+            elif str(col).startswith("Total client ("):
+                cls = "col-total"
+            if col == "Plateforme":
+                # Badge GDF
+                if is_gdf:
+                    text = f"{text} <span class='badge-gdf'>GDF</span>"
+                name_l = str(row["Plateforme"]).lower().strip()
+                # * pour Airbnb host-only (simplified pricing)
+                if name_l == "airbnb host-only":
+                    text = f"{text}<sup>*</sup>"
+                # † pour Vrbo / Abritel (taux inclut frais d'encaissement)
+                if name_l == "vrbo / abritel":
+                    text = f"{text}<sup>†</sup>"
+                # ‡ pour Booking.com (taux inclut frais d'encaissement)
+                if name_l == "booking.com":
+                    text = f"{text}<sup>‡</sup>"
             tds.append(f"<td class='{cls}'>{text}</td>")
         rows_html.append(f"<tr class='{tr_class}'>" + "".join(tds) + "</tr>")
     tbody = "<tbody>" + "".join(rows_html) + "</tbody>"
@@ -295,14 +309,34 @@ DF = compute_table(PLATFORMS, input_mode, input_value)
 # ===== Classement dynamique (même logique que les anciens tableaux) =====
 # Classement global (GDF inclus) + brisage d'égalité comme dans les anciens tableaux
 if input_mode == "net_host":
-    sort_cols = ["Net propriétaire (€)", "Total prix public client (€)", "Plateforme"]
+    sort_cols = ["Net propriétaire (Loyers hors frais de commercialisation)", "Total client (Frais de commercialisation inclus)", "Plateforme"]
     sort_asc  = [False, True, True]
 else:
-    sort_cols = ["Total prix public client (€)", "Net propriétaire (€)", "Plateforme"]
+    sort_cols = ["Total client (Frais de commercialisation inclus)", "Net propriétaire (Loyers hors frais de commercialisation)", "Plateforme"]
     sort_asc  = [True, False, True]
 DF = DF.sort_values(sort_cols, ascending=sort_asc).reset_index(drop=True)
 
 # Affichage du tableau principal
+# styles de différenciation pour les colonnes Net / Total
+st.markdown("""
+<style>
+.gdf-table td.col-net { background:#E7F4EC; color:#000; font-weight:700; }
+.gdf-table td.col-total { background:#ECF7F1; color:#000; font-weight:700; }
+</style>
+""", unsafe_allow_html=True)
+
 st.markdown(table_to_html(DF), unsafe_allow_html=True)
+
+# Notes de bas de tableau
+st.markdown("""
+<div style='font-size:0.9rem; margin-top:8px;'>
+<sup>*</sup> <em>Airbnb “host-only”</em> : modèle « simplified pricing » déployé progressivement aux comptes professionnels / PMS.
+Source : <a href="https://www.airbnb.com/help" target="_blank">Airbnb Help Center — Simplified pricing</a>.
+<br/>
+<sup>†</sup> <em>Vrbo / Abritel</em> : le taux indiqué <strong>inclut</strong> les frais de traitement des paiements (prise en charge par la plateforme).
+<br/>
+<sup>‡</sup> <em>Booking.com</em> : le taux indiqué <strong>inclut</strong> les frais d'encaissement / traitement des paiements lorsque gérés par Booking.
+</div>
+""", unsafe_allow_html=True)
 
 
